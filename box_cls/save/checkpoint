@@ -1,0 +1,2 @@
+model_checkpoint_path: "cls_point.dpk"
+all_model_checkpoint_paths: "cls_point.dpk"
