@@ -1,0 +1,7 @@
+selectivesearch
+
+sklearn
+beautifulsoup4
+IPython
+selenium
+openpyxl
