@@ -1,0 +1,2 @@
+model_checkpoint_path: "box_cls_model3.dpk"
+all_model_checkpoint_paths: "box_cls_model3.dpk"
