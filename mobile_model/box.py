@@ -9,15 +9,15 @@ import numpy as np
 
 def get_data(file_path):
     all_data=[]
-    all_label=[]
+    # all_label=[]
     for file in os.listdir(file_path):
         if file.split('.')[-1]=='jpg':
             image=cv2.imread(os.path.join(file_path,file))
             all_data.append(image)
-            label=file.split('.')[0].split('_')[-1]
-            all_label.append(label)
+            # label=file.split('.')[0].split('_')[-1]
+            # all_label.append(label)
 
-    return all_data,all_label
+    return all_data
 
 
 def box_info(image,choice_num):
@@ -64,7 +64,7 @@ def box_info(image,choice_num):
 def DL_parse(all_orig_crop_img,picel_scale,r_scale):
     with tf.Graph().as_default():
         output_graph_def = tf.GraphDef()
-        output_graph_path = "./box_cls_model2.pb"     #cls_modle3.pb（手机识别数据二值化训练模型）
+        output_graph_path = "./box_cls_model12.pb"     #cls_modle3.pb（手机识别数据二值化训练模型）
         # ,box_cls_modle,box_cls_modle3(模型压缩识别准确率较高模型),
         # box_cls_modle1（未压缩模型准确率较高模型）
 
@@ -103,7 +103,7 @@ def DL_parse(all_orig_crop_img,picel_scale,r_scale):
 
 def box_parse(img_path,box_num):
     # chioce_dict = dict(zip([0, 1, 2, 3, 4, 5, 6], list('ABCDEFG')))
-    test_data,test_label=get_data(img_path)
+    test_data=get_data(img_path)
     all_orig_crop_img=[]
     all_crop_img=[]
     all_picel_scale=[]
@@ -119,16 +119,16 @@ def box_parse(img_path,box_num):
 
     deeplearning_out,finally_out=DL_parse(all_orig_crop_img,all_picel_scale,all_r_scale)
 
-    return test_data,test_label,deeplearning_out,finally_out
+    return test_data,deeplearning_out,finally_out
 
 
 def main():
     chioce_dict=dict(zip([0,1,2,3,4,5,6],list('ABCDEFG')))
-    img_path='/Users/wywy/Desktop/crop_image/3'
+    img_path='/Users/wywy/Desktop/crop_image/7_1'
     save_path='/Users/wywy/Desktop/f_ou'
-    save_path2='/Users/wywy/Desktop/crop_image/33'
-    box_num=3
-    data,labels,deeplearning_out,finally_out=box_parse(img_path,box_num)
+    save_path2='/Users/wywy/Desktop/crop_image/7_out'
+    box_num=7
+    data,deeplearning_out,finally_out=box_parse(img_path,box_num)
 
     for index in range(len(deeplearning_out)):
         name=''
@@ -137,15 +137,15 @@ def main():
         else:
             for out in deeplearning_out[index]:
                 name+=chioce_dict.get(out)
-        label=labels[index]
-        out_lable=len(list(name))-1
+        # label=labels[index]
+        # out_lable=len(list(name))-1
         # dl_label=deeplearning_out[index]
         # if int(label)==out_lable:
         #     cv2.imwrite(save_path+'/'+str(index)+'_'+str(label)+'_'+str(deeplearning_out[index])+'.jpg',data[index])
         # else:
         #     cv2.imwrite(save_path2 + '/' + str(index) + '_' + str(label)+'_'+str(name) +'_'+str(dl_label)+ '.jpg', data[index])
 
-        cv2.imwrite(save_path2 + '/' + str(index) + '_' + str(label)+ '_' + str(name) + '_' + str(deeplearning_out[index]) + '.jpg',
+        cv2.imwrite(save_path2 + '/' + str(index) + '_' + str(name) + '_' + str(deeplearning_out[index]) + '.jpg',
                     data[index])
 
 

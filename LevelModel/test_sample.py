@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 
 
-testimg_path="/Users/wywy/Desktop/test_level"
+testimg_path="/Users/wywy/Desktop/quality_1"
 test_filename = './test.tfrecords'
 
 data_dict=dict(zip(list('ABCDX'),[0,1,2,3,4]))   #等级分类
@@ -83,8 +83,9 @@ if __name__=='__main__':
         threads = tf.train.start_queue_runners(coord=coord,sess=sess)
 
         sess.run(init)
-        aa,bb,cc=sess.run(a)
-        print(aa[0])
-        print(bb[0])
-        print(cc[0])
+        for i in range(100):
+            aa,bb,cc=sess.run(a)
+            print(aa[0])
+            print(bb[0])
+            print(cc[0])
 

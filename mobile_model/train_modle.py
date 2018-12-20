@@ -69,7 +69,7 @@ class Modle:
 
     def backward(self):
         self.loss=tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y_,logits=self.out))
-        self.opt=tf.train.AdamOptimizer(1e-5).minimize(self.loss)
+        self.opt=tf.train.AdamOptimizer(1e-4).minimize(self.loss)
 
         self.argamx_label=tf.argmax(self.y_,axis=1)
         self.argamx_out= tf.reshape(tf.argmax(self.out,axis=1),[-1],name='output')
@@ -92,7 +92,7 @@ if __name__=='__main__':
         sess.run(init)
         coord = tf.train.Coordinator()  # 创建一个协调器，管理线程
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)
-        saver.restore(sess,'./save/box_cls_model3.dpk')
+        saver.restore(sess,'./save/box_cls_model12.dpk')
         for i in range(100000):
             # train_img,train_label,tarin_file=sess.run(train_data)
             # train_img1=train_img/255-0.5
@@ -133,7 +133,7 @@ if __name__=='__main__':
                         tes_acc.append(1)
                     else:
                         tes_acc.append(0)
-                        # misc.imsave('/Users/wywy/Desktop/test_e'+'/'+str(test_out[test_index])+'_'+bytes.decode(test_name[test_index]),test_img.reshape([-1,32,42])[test_index])
+                        misc.imsave('/Users/wywy/Desktop/test_e'+'/'+str(test_out[test_index])+'_'+bytes.decode(test_name[test_index]),test_img.reshape([-1,32,42])[test_index])
 
                 test_acc = np.mean(np.array(tes_acc))
 
@@ -141,11 +141,11 @@ if __name__=='__main__':
                 output_graph_def = tf.graph_util.convert_variables_to_constants(sess, graph_def,
                                                                                 ['output'])
 
-                with tf.gfile.GFile("./box_cls_model3.pb", 'wb') as f:
+                with tf.gfile.GFile("./box_cls_model12.pb", 'wb') as f:
                     f.write(output_graph_def.SerializeToString())
 
 
-                saver.save(sess,'./save/box_cls_model3.dpk')
+                saver.save(sess,'./save/box_cls_model12.dpk')
 
                 print('------------test iter :{},  test loss:{},  test acc:{}----------'.format(i,test_loss,test_acc))
 

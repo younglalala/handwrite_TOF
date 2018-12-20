@@ -3,6 +3,7 @@ import os
 import numpy as np
 import operator
 import logging
+import urllib.request
 
 
 import imutils
@@ -141,9 +142,9 @@ def rotate_bound_white_bg(image, angle):
     # borderValue 缺失背景填充色彩，此处为白色，可自定义
     return cv2.warpAffine(image, M, (nW, nH), borderValue=(255, 255, 255))
 
-# img_path='/Users/wywy/Desktop/level_choice/all_level'
-# save_path='/Users/wywy/Desktop/level_choice/aug1'
-
+# img_path='/Users/wywy/Desktop/level_aug'
+# save_path='/Users/wywy/Desktop/level_aug4'
+#
 # x=0
 # all_file=[]
 # for file in os.listdir(img_path):
@@ -268,8 +269,8 @@ def cut_img(img_path,area_num):
     return crop_img1
             # crop_img1.save(os.path.join(save_path,file))
 
-# img_path='/Users/wywy/Desktop/level_choice/all_level'
-# save_path='/Users/wywy/Desktop/level_choice/aug3'
+# img_path='/Users/wywy/Desktop/level_aug4'
+# save_path='/Users/wywy/Desktop/level_aug5'
 # all_file=[]
 # for file in os.listdir(img_path):
 #     if file=='.DS_Store':
@@ -279,7 +280,10 @@ def cut_img(img_path,area_num):
 # random.shuffle(all_file)
 # for f in all_file:
 #     crop_img1=cut_img(img_path+'/'+f,50)
-#     crop_img1.save(save_path+'/aug3_'+f)
+#     bg=Image.new('RGB',(600,600),'white')
+#     bg.paste(crop_img1,(0,0))
+#
+#     bg.save(save_path+'/aug0_'+f)
 
 
 
@@ -309,8 +313,9 @@ def salt(img, n):
             img[j,i,2]= 0
     return img
 
-# img_path='/Users/wywy/Desktop/level_choice/all_level'
-# save_path='/Users/wywy/Desktop/level_choice/aug4'
+
+# img_path = '/Users/wywy/Desktop/level_aug'
+# save_path='/Users/wywy/Desktop/level_aug2'
 # for file in os.listdir(img_path):
 #     if file=='.DS_Store':
 #         os.remove(img_path+'/'+file)
@@ -318,6 +323,7 @@ def salt(img, n):
 #         img=cv2.imread(img_path+'/'+file)
 #         s_img=salt(img,3000)
 #         cv2.imwrite(save_path+'/aug4_'+file,s_img)
+# #
 
 
 
@@ -358,13 +364,13 @@ def ImgWithWhiteStripes(img_path,bg_path,save_path,white_num):
             for i in range(white_num):
                 paste_x1,paste_y1=random.randint(0,img1.size[0]),random.randint(0,img1.size[1])
                 img1.paste(random.sample(all_bg,1)[0],(paste_x1,paste_y1))
-            img1.save(save_path+'/aug5_'+file)
+            img1.save(save_path+'/aug4_'+file)
 
-# img_path='/Users/wywy/Desktop/level_choice/all_level'
+# img_path='/Users/wywy/Desktop/level_out'
 # bg_path='/Users/wywy/Desktop/bg'
-# save_path='/Users/wywy/Desktop/level_choice/aug5'
+# save_path='/Users/wywy/Desktop/level_aug'
 # ImgWithWhiteStripes(img_path,bg_path,save_path,8)
-#
+
 
 # img_path='/Users/wywy/Desktop/level_choice/all_aug'
 # save_path='/Users/wywy/Desktop/train_level'
@@ -598,6 +604,21 @@ def ExamNumberArea(all_set,image):
     return num_area
 
 
+# ROI_set=(1150,280,1700,850)
+# img_path='/Users/wywy/Desktop/level_data'
+# save_path='/Users/wywy/Desktop/ROI_area'
+def get_ROIArea(img_path,save_path,ROI_set):
+    for file in os.listdir(img_path):
+        if file.split('.')[-1]=='jpg' or 'png':
+            img=Image.open(os.path.join(img_path,file))
+            ROI_img=img.crop(ROI_set)
+            ROI_img.save(os.path.join(save_path,file))
+
+# get_ROIArea(img_path,save_path,ROI_set)
+
+
+
+
 
 
 def level_main():
@@ -626,32 +647,46 @@ def level_main():
 # level_main()
 
 
-# #
-# level_set=[1100,320,1800,880]
-# img_path='/Users/wywy/Desktop/level_data'
-# save_path='/Users/wywy/Desktop/ROI_area'
-# for file in os.listdir(img_path):
-#     if file=='.DS_Store':
-#         os.remove(os.path.join(img_path,file))
-#     else:
-#         img=Image.open(img_path+'/'+file)
-#         crop=img.crop(level_set)
-#         crop.save(save_path+'/'+file)
 
+#根据数据日期获取图片，获取等级识别数据
+def get_level_data(img_path,label_path,save_path,date_infor):
+    """
+    :param img_path: 图片html的txt文件的路径
+    :param label_path: 图片label的txt文件的路径
+    :param save_path: 保存图片的路径
+    :param date_infor: 图片上传的日期
+    :return:
+    """
+    all_html=[]
+    with open(img_path) as f :
+        lines=f.readlines()
+        for line in lines:
+            line=line.strip()
+            if line!='#' and int(line.split('/')[5].split('-')[0])>date_infor:
+                all_html.append(line)
+    print(len(all_html))
+
+    all_label=[]
+    label_infor=list('ABCDEFGX')
+    with open(label_path,encoding='utf-8') as f1:
+        labels=f1.readlines()
+        for label in labels:
+            label=label.strip()
+            if label in label_infor:
+                all_label.append(label)
+
+    for i,infor in enumerate(all_html):
+        urllib.request.urlretrieve(infor,save_path+'/{}_{}.jpg'.format(i,all_label[i]))
 
 #
-# img_path='/Users/wywy/Desktop/level_out'
-# save_path='/Users/wywy/Desktop/train_level'
-# c=1780
-# for file in os.listdir(img_path):
-#     if file =='.DS_Store':
-#         os.remove(img_path+'/'+file)
-#     else:
-#         img=Image.open(img_path+'/'+file)
-#         name=file.split('.')[0].split('_')[-1]
-#         img.save(save_path+'/error'+str(c)+'_'+name+'.jpg')
-#         c+=1
-# print(c)
+# img_path='/Users/wywy/Desktop/img.txt'
+# label_path='/Users/wywy/Desktop/label.txt'
+# save_path='/Users/wywy/Desktop/level'
+# date_infor=20181210
+# get_level_data(img_path,label_path,save_path,date_infor)
+
+
+
 
 
 

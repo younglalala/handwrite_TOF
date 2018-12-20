@@ -34,7 +34,7 @@ choice_dict=dict(zip([0,1,2,3,4],list('ABCDX')))
 
 with tf.Graph().as_default():
     output_graph_def = tf.GraphDef()
-    output_graph_path = "./level_modle4.pb"
+    output_graph_path = "./level_modle7.pb"
 
     with open(output_graph_path, "rb") as f:
         output_graph_def.ParseFromString(f.read())
@@ -44,12 +44,12 @@ with tf.Graph().as_default():
 
         input_x = sess.graph.get_tensor_by_name("input:0")
         model_output = sess.graph.get_tensor_by_name("output:0")
-        dp=sess.graph.get_tensor_by_name("dp:0")
+        # dp=sess.graph.get_tensor_by_name("dp:0")
 
-        output = sess.run(model_output, feed_dict={input_x:np.array(all_image),dp:1.})
+        output = sess.run(model_output, feed_dict={input_x:np.array(all_image)})
         for ii in range(len(output)):
             if choice_dict.get(output[ii])==all_label[ii]:
-                cv2.imwrite('/Users/wywy/Desktop/t/' + str(ii) + '_' + choice_dict.get(output[ii]) + '.jpg',
+                cv2.imwrite('/Users/wywy/Desktop/t1/' + str(ii) + '_' + choice_dict.get(output[ii]) + '.jpg',
                             all_image1[ii].reshape([64, 64]))
             else:
-                cv2.imwrite('/Users/wywy/Desktop/f/'+str(ii)+'_'+choice_dict.get(output[ii])+'.jpg',all_image1[ii].reshape([64,64]))
+                cv2.imwrite('/Users/wywy/Desktop/f1/'+str(ii)+'_'+choice_dict.get(output[ii])+'.jpg',all_image1[ii].reshape([64,64]))

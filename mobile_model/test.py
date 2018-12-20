@@ -2,6 +2,7 @@ import os
 import urllib.request
 import cv2
 import numpy as np
+import random
 from PIL import Image
 from skimage import data, exposure, img_as_float
 import math
@@ -131,58 +132,58 @@ def ssr(img,sigma):
 
 
 
-G=5
-b=25
-beta=46
-alpha=125
-sigma_list=[int(15),int(80),int(250)]
-sigma=1
-
-
-img_path='/Users/wywy/Desktop/test_data/4_save'
-save_path='/Users/wywy/Desktop/test_out'
-count=0
-for file in os.listdir(img_path):
-    if file=='.DS_Store':
-        os.remove(img_path+'/'+file)
-    else:
-        img=cv2.imread(img_path+'/'+file)
-        # img=cv2.resize(img, (int(img.shape[1]/5), int(img.shape[0]/5)), interpolation=cv2.INTER_AREA)
-        # cv2.normalize(img, img, 0, 255, cv2.NORM_MINMAX)
-        # img_t = cv2.convertScaleAbs(img)
-        # gam2 = exposure.adjust_gamma(img_t, 0.3)
-        img=MSRCR(img,sigma_list,G,b,alpha,beta,low_clip,high_clip)
-        #
-        # # img=ssr(img, sigma)
-        img_gray=cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
-        # print(img_gray.shape)
-        #
-        k_size = int(img.shape[0] * 0.3), int(img.shape[1] / 4 * 0.4)
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, k_size)
-        closed = cv2.morphologyEx(img_gray, cv2.MORPH_CLOSE, kernel)
-        _,threshold=cv2.threshold(closed, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        # closed = cv2.morphologyEx(threshold, cv2.MORPH_CLOSE, (int(img.shape[0] / 1), int(img.shape[1] / 1)))
-
-        # cnts = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        # cnts = cnts[1]
-        # contours_set = []
-        # choice_area = [(image.shape[1] / choice_num) * (i) for i in range(choice_num + 1)]
-        # if len(cnts) > 0:
-        #     for c in cnts:
-        #         rect = cv2.minAreaRect(c)  # 寻找外接矩形，返回（（中心点x，y），（w，h），矩形角度）
-        #         left_top_x, left_top_y, right_x, rigth_y = math.ceil(rect[0][0] - rect[1][0] / 2), math.ceil(
-        #             rect[0][1] - rect[1][1] / 2), math.ceil(rect[0][0] + rect[1][0] / 2), \
-        #                                                    math.ceil(rect[0][1] + rect[1][1] / 2)
-        #         w, h = rect[1][0], rect[1][1]
-        #         # 塞选条件为：宽度大于原始宽度的1/2高度小于原始图片的1/4的图片过滤掉
-        #         # if w > image.shape[1] / choice_num * 1.2 or h >= image.shape[0] or h <= image.shape[0] / 4:
-        #         #     pass
-        #         # else:
-        #         contours_set.append([left_top_x, left_top_y, right_x, rigth_y])
-        #
-        #         image = cv2.rectangle(img, (left_top_x, left_top_y), (right_x, rigth_y), (0, 255, 0), 2)
-
-        cv2.imwrite(save_path+'/'+file,threshold)
+# G=5
+# b=25
+# beta=46
+# alpha=125
+# sigma_list=[int(15),int(80),int(250)]
+# sigma=1
+#
+#
+# img_path='/Users/wywy/Desktop/test_data/4_save'
+# save_path='/Users/wywy/Desktop/test_out'
+# count=0
+# for file in os.listdir(img_path):
+#     if file=='.DS_Store':
+#         os.remove(img_path+'/'+file)
+#     else:
+#         img=cv2.imread(img_path+'/'+file)
+#         # img=cv2.resize(img, (int(img.shape[1]/5), int(img.shape[0]/5)), interpolation=cv2.INTER_AREA)
+#         # cv2.normalize(img, img, 0, 255, cv2.NORM_MINMAX)
+#         # img_t = cv2.convertScaleAbs(img)
+#         # gam2 = exposure.adjust_gamma(img_t, 0.3)
+#         img=MSRCR(img,sigma_list,G,b,alpha,beta,low_clip,high_clip)
+#         #
+#         # # img=ssr(img, sigma)
+#         img_gray=cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
+#         # print(img_gray.shape)
+#         #
+#         k_size = int(img.shape[0] * 0.3), int(img.shape[1] / 4 * 0.4)
+#         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, k_size)
+#         closed = cv2.morphologyEx(img_gray, cv2.MORPH_CLOSE, kernel)
+#         _,threshold=cv2.threshold(closed, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+#         # closed = cv2.morphologyEx(threshold, cv2.MORPH_CLOSE, (int(img.shape[0] / 1), int(img.shape[1] / 1)))
+#
+#         # cnts = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+#         # cnts = cnts[1]
+#         # contours_set = []
+#         # choice_area = [(image.shape[1] / choice_num) * (i) for i in range(choice_num + 1)]
+#         # if len(cnts) > 0:
+#         #     for c in cnts:
+#         #         rect = cv2.minAreaRect(c)  # 寻找外接矩形，返回（（中心点x，y），（w，h），矩形角度）
+#         #         left_top_x, left_top_y, right_x, rigth_y = math.ceil(rect[0][0] - rect[1][0] / 2), math.ceil(
+#         #             rect[0][1] - rect[1][1] / 2), math.ceil(rect[0][0] + rect[1][0] / 2), \
+#         #                                                    math.ceil(rect[0][1] + rect[1][1] / 2)
+#         #         w, h = rect[1][0], rect[1][1]
+#         #         # 塞选条件为：宽度大于原始宽度的1/2高度小于原始图片的1/4的图片过滤掉
+#         #         # if w > image.shape[1] / choice_num * 1.2 or h >= image.shape[0] or h <= image.shape[0] / 4:
+#         #         #     pass
+#         #         # else:
+#         #         contours_set.append([left_top_x, left_top_y, right_x, rigth_y])
+#         #
+#         #         image = cv2.rectangle(img, (left_top_x, left_top_y), (right_x, rigth_y), (0, 255, 0), 2)
+#
+#         cv2.imwrite(save_path+'/'+file,threshold)
 
 
 
@@ -196,6 +197,28 @@ for file in os.listdir(img_path):
 #         bg=Image.new('RGB',(img.size[0]+5,img.size[1]+5),'white')
 #         bg.paste(img,(3,3))
 #         bg.save(img_path+'/'+file)
+
+
+
+# img_path='/Users/wywy/Desktop/add'
+# save_path='/Users/wywy/Desktop/train_cls'
+# c=606
+# for i in range(50):
+#     for file in os.listdir(img_path):
+#         if file=='.DS_Store':
+#             os.remove(img_path+'/'+file)
+#         else:
+#             name=file.split('.')[0].split('_')[-1]
+#             img=Image.open(img_path+'/'+file)
+#             img.save(save_path+'/aug'+str(c)+'_'+name+'.jpg')
+#             # print(save_path+'/aug'+str(c)+'_'+name+'.jpg')
+#             c+=1
+#
+# print(c)
+
+
+
+
 
 
 
