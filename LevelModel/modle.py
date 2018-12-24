@@ -14,19 +14,19 @@ class Modle:
         self.y_=tf.placeholder(dtype=tf.float32,shape=[None,5])
         # self.dp=tf.placeholder(dtype=tf.float32,name='dp')
 
-        self.conv1_w=tf.Variable(tf.random_normal([3,3,1,10],dtype=tf.float32,stddev=0.01))
-        self.conv1_b=tf.Variable(tf.zeros([10]))
+        self.conv1_w=tf.Variable(tf.random_normal([3,3,1,16],dtype=tf.float32,stddev=tf.sqrt(1/16)))
+        self.conv1_b=tf.Variable(tf.zeros([16]))
 
-        self.conv2_w=tf.Variable(tf.random_normal([3,3,10,16],dtype=tf.float32,stddev=0.01))
-        self.conv2_b=tf.Variable(tf.zeros([16]))
+        self.conv2_w=tf.Variable(tf.random_normal([3,3,16,32],dtype=tf.float32,stddev=tf.sqrt(1/32)))
+        self.conv2_b=tf.Variable(tf.zeros([32]))
 
-        self.conv3_w=tf.Variable(tf.random_normal([3,3,16,32],dtype=tf.float32,stddev=0.01))
-        self.conv3_b=tf.Variable(tf.zeros([32]))
+        self.conv3_w=tf.Variable(tf.random_normal([3,3,32,64],dtype=tf.float32,stddev=tf.sqrt(1/64)))
+        self.conv3_b=tf.Variable(tf.zeros([64]))
 
-        self.fc1_w=tf.Variable(tf.random_normal([2*2*32,128],dtype=tf.float32,stddev=0.01))
+        self.fc1_w=tf.Variable(tf.random_normal([2*2*64,128],dtype=tf.float32,stddev=tf.sqrt(1/128)))
         self.fc1_b=tf.Variable(tf.zeros([128]))
 
-        self.fc2_w=tf.Variable(tf.random_normal([128,5],dtype=tf.float32,stddev=0.01))
+        self.fc2_w=tf.Variable(tf.random_normal([128,5],dtype=tf.float32,stddev=tf.sqrt(1/5)))
         self.fc2_b=tf.Variable(tf.zeros([5]))
 
 
@@ -50,7 +50,7 @@ class Modle:
         self.pool3 = tf.nn.max_pool(self.conv3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')   #4,4,32
 
         print(self.pool3)
-        self.flat=tf.reshape(self.pool3,shape=[-1,2*2*32])
+        self.flat=tf.reshape(self.pool3,shape=[-1,2*2*64])
 
         self.fc1=tf.nn.relu(tf.layers.batch_normalization(tf.matmul(self.flat,self.fc1_w)+self.fc1_b))
         # self.fc1=tf.nn.dropout(self.fc1,keep_prob=self.dp)
@@ -60,7 +60,7 @@ class Modle:
 
     def backward(self):
         self.loss=tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y_,logits=self.out))
-        self.opt=tf.train.AdamOptimizer(1e-6).minimize(self.loss)
+        self.opt=tf.train.AdamOptimizer(1e-4).minimize(self.loss)
 
         self.argamx_label=tf.argmax(self.y_,axis=1)
         self.argamx_out= tf.reshape(tf.argmax(self.out,axis=1),[-1],name='output')
@@ -72,7 +72,7 @@ if __name__=='__main__':
     net=Modle()
     net.forward()
     net.backward()
-    train_data = train_shuffle_batch(train_filename, [64, 64, 1], 16)
+    train_data = train_shuffle_batch(train_filename, [64, 64, 1], 128)
     test_data = test_shuffle_batch(test_filename, [64, 64, 1], 1000)
 
     init = tf.global_variables_initializer()
@@ -84,7 +84,7 @@ if __name__=='__main__':
         sess.run(init)
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)
-        saver.restore(sess,'./save/level_modle7.dpk')
+        saver.restore(sess,'./save/level_modle10.dpk')
         for i in range(100000):
             # train_img,train_label,tarin_file=sess.run(train_data)
             # train_img1=train_img/255-0.5
@@ -99,12 +99,12 @@ if __name__=='__main__':
             #         tr_acc.append(1)
             #     else:
             #         tr_acc.append(0)
-            #         # misc.imsave('/Users/wywy/Desktop/train_e'+'/'+str(train_out[train_index])+'_'+bytes.decode(tarin_file[train_index]),train_img.reshape([-1,64,64]) [train_index])
+            #         # misc.imsave('/Users/wywy/Desktop/train_e1'+'/'+str(chioce_dict.get(train_out[train_index]))+'_'+bytes.decode(tarin_file[train_index]),train_img.reshape([-1,64,64]) [train_index])
             #
             # train_acc = np.mean(np.array(tr_acc))
             #
             # print('train iter :{},  train loss:{},  train acc:{}'.format(i,train_loss,train_acc))
-            # # #
+            # # # # #
 
             if i%100==0:
                 test_img, test_label1, test_name = sess.run(test_data)
@@ -115,7 +115,7 @@ if __name__=='__main__':
 
                 test_loss ,test_acc,test_out,test_l= sess.run(
                     [net.loss,net.acc,net.argamx_out,net.argamx_label],
-                    feed_dict={net.x: test_img1, net.y_: test_label })
+                    feed_dict={net.x: test_img1, net.y_: test_label})
 
                 tes_acc = []
                 for test_index in range(len(test_out)):
@@ -123,7 +123,7 @@ if __name__=='__main__':
                         tes_acc.append(1)
                     else:
                         tes_acc.append(0)
-                        # misc.imsave('/Users/wywy/Desktop/test_e'+'/'+str(chioce_dict.get(test_out[test_index])) +'_'+bytes.decode(test_name[test_index]),test_img.reshape([-1,64,64])[test_index])
+                        # misc.imsave('/Users/wywy/Desktop/test_e1'+'/'+str(chioce_dict.get(test_out[test_index])) +'_'+bytes.decode(test_name[test_index]),test_img.reshape([-1,64,64])[test_index])
 
                 test_acc = np.mean(np.array(tes_acc))
 
@@ -131,12 +131,12 @@ if __name__=='__main__':
                 output_graph_def = tf.graph_util.convert_variables_to_constants(sess, graph_def,
                                                                                 ['output'])
 
-                with tf.gfile.GFile("./level_modle7.pb", 'wb') as f:
+                with tf.gfile.GFile("./level_modle10.pb", 'wb') as f:
                     f.write(output_graph_def.SerializeToString())
 
 
 
-                # saver.save(sess,'./save/level_modle7.dpk')
+                # saver.save(sess,'./save/level_modle10.dpk')
 
                 print('------------test iter :{},  test loss:{},  test acc:{}----------'.format(i,test_loss,test_acc))
 

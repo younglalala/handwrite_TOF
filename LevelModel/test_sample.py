@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 
 
-testimg_path="/Users/wywy/Desktop/quality_1"
+testimg_path="/Users/wywy/Desktop/test_level"
 test_filename = './test.tfrecords'
 
 data_dict=dict(zip(list('ABCDX'),[0,1,2,3,4]))   #等级分类
