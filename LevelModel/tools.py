@@ -607,7 +607,7 @@ def ExamNumberArea(all_set,image):
 # #
 # ROI_set=(1150,280,1700,850)
 # img_path='/Users/wywy/Desktop/level'
-# save_path='/Users/wywy/Desktop/ROI_level'
+# save_path='/Users/wywy/Desktop/level_ROI'
 def get_ROIArea(img_path,save_path,ROI_set):
     for file in os.listdir(img_path):
         if file !='.DS_Store':
@@ -624,8 +624,8 @@ def get_ROIArea(img_path,save_path,ROI_set):
 
 def level_main():
     cc=0
-    img_path='/Users/wywy/Desktop/ROI_level'
-    save_path='/Users/wywy/Desktop/level_out'
+    img_path='/Users/wywy/Desktop/level_ROI'
+    save_path='/Users/wywy/Desktop/level_out1'
     for file in os.listdir(img_path):
         if file=='.DS_Store':
             os.remove(os.path.join(img_path,file))
@@ -683,63 +683,42 @@ def get_level_data(img_path,label_path,save_path,date_infor):
 # img_path='/Users/wywy/Desktop/img.txt'
 # label_path='/Users/wywy/Desktop/label.txt'
 # save_path='/Users/wywy/Desktop/level'
-# date_infor=20181219
+# date_infor=20181221
 # get_level_data(img_path,label_path,save_path,date_infor)
 
 
-#增加识别错误数据
-# img_path='/Users/wywy/Desktop/train_e'
-# save_path='/Users/wywy/Desktop/train_level'
-# c=0
-# for file in os.listdir(img_path):
-#     if file != ".DS_Store":
-#         img=Image.open(os.path.join(img_path,file))
-#         name=file.split('.')[0].split('_')[-1]
-#         # name1='_'.join(name)+'.jpg'
-#         img.save(os.path.join(save_path,'e{}_{}.jpg'.format(c,name)))
-#         # print(os.path.join(save_path,'e{}_{}.jpg'.format(c,name)))
-#         c+=1
-# print(c)
 
-
-#塞选部分进行数据增强
-# img_path='/Users/wywy/Desktop/train_level'
-# save_path='/Users/wywy/Desktop/p_aug'
-#
-# all_file=[]
+# img_path='/Users/wywy/Desktop/level_out1'
+# save_path='/Users/wywy/Desktop/level_out'
+# c=181
 # for file in os.listdir(img_path):
 #     if file != '.DS_Store':
-#         all_file.append(file)
-# random.shuffle(all_file)
-# for i,f in enumerate(all_file):
-#     if i<8000:
-#         img=Image.open(os.path.join(img_path,f))
-#         img.save(os.path.join(save_path,f))
+#         img=Image.open(os.path.join(img_path,file))
+#         name=file.split('.')[0].split('_')[-1]
+#         img.save(os.path.join(save_path,'{}_{}.jpg'.format(c,name)))
+#         c+=1
+# print(c)
 #
-
-# img_path='/Users/wywy/Desktop/p_aug'
-# save_path='/Users/wywy/Desktop/bright_img'
+# img_path='/Users/wywy/Desktop/train_level'
+# save_path='/Users/wywy/Desktop/b_save'
+#
 # for file in os.listdir(img_path):
-#     if file != ".DS_Store":
-#         img=cv2.imread(os.path.join(img_path,file))
-#
-#         gam1= exposure.adjust_gamma(img, 0.1)
-# #
-#         cv2.imwrite(os.path.join(save_path,file),gam1)
-#
+#     if file != '.DS_Store':
+#         name=file.split('.')[0].split('_')[0]
+#         if 'f' in list(name):
+#             print(file)
+
 
 img_path='/Users/wywy/Desktop/train_level'
-c=0
+# save_path='/Users/wywy/Desktop/train_level'
 for file in os.listdir(img_path):
-    if file != '.DS_Store':
-        name=file.split('.')[0].split('_')[0]
-        if 'f' in list(name):
-            os.remove(os.path.join(img_path,file))
-            c+=1
-print(c)
-
-
-
+    if file !='.DS_Store':
+        img=Image.open(os.path.join(img_path,file))
+        w,h=img.size
+        if w>1 and h>1:
+            pass
+        else:
+            print(file)
 
 
 

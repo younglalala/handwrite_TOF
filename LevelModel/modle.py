@@ -84,7 +84,7 @@ if __name__=='__main__':
         sess.run(init)
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)
-        saver.restore(sess,'./save/level_modle10.dpk')
+        saver.restore(sess,'./save/level_modle11.dpk')
         for i in range(100000):
             # train_img,train_label,tarin_file=sess.run(train_data)
             # train_img1=train_img/255-0.5
@@ -104,7 +104,7 @@ if __name__=='__main__':
             # train_acc = np.mean(np.array(tr_acc))
             #
             # print('train iter :{},  train loss:{},  train acc:{}'.format(i,train_loss,train_acc))
-            # # # # #
+            # # # #
 
             if i%100==0:
                 test_img, test_label1, test_name = sess.run(test_data)
@@ -131,12 +131,12 @@ if __name__=='__main__':
                 output_graph_def = tf.graph_util.convert_variables_to_constants(sess, graph_def,
                                                                                 ['output'])
 
-                with tf.gfile.GFile("./level_modle10.pb", 'wb') as f:
+                with tf.gfile.GFile("./level_modle11.pb", 'wb') as f:
                     f.write(output_graph_def.SerializeToString())
 
 
 
-                # saver.save(sess,'./save/level_modle10.dpk')
+                saver.save(sess,'./save/level_modle11.dpk')
 
                 print('------------test iter :{},  test loss:{},  test acc:{}----------'.format(i,test_loss,test_acc))
 

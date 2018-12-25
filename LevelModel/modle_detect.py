@@ -4,7 +4,7 @@ import cv2
 from PIL import Image
 import numpy as np
 
-img_path='/Users/wywy/Desktop/test_level'
+img_path='/Users/wywy/Desktop/level_out'
 all_image=[]
 all_image1=[]
 all_label=[]
@@ -34,7 +34,7 @@ choice_dict=dict(zip([0,1,2,3,4],list('ABCDX')))
 
 with tf.Graph().as_default():
     output_graph_def = tf.GraphDef()
-    output_graph_path = "./level_modle8.pb"
+    output_graph_path = "./level_modle11.pb"
 
     with open(output_graph_path, "rb") as f:
         output_graph_def.ParseFromString(f.read())
@@ -49,7 +49,8 @@ with tf.Graph().as_default():
         output = sess.run(model_output, feed_dict={input_x:np.array(all_image)})
         for ii in range(len(output)):
             if choice_dict.get(output[ii])==all_label[ii]:
-                cv2.imwrite('/Users/wywy/Desktop/t/' + str(ii) + '_' + choice_dict.get(output[ii]) + '.jpg',
-                            all_image1[ii].reshape([64, 64]))
+                pass
+                # cv2.imwrite('/Users/wywy/Desktop/t/' + str(ii) + '_' + choice_dict.get(output[ii]) + '.jpg',
+                #             all_image1[ii].reshape([64, 64]))
             else:
                 cv2.imwrite('/Users/wywy/Desktop/f/'+str(ii)+'_'+choice_dict.get(output[ii])+'.jpg',all_image1[ii].reshape([64,64]))
