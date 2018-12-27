@@ -4,7 +4,7 @@ import cv2
 from PIL import Image
 import numpy as np
 
-img_path='/Users/wywy/Desktop/level_out'
+img_path='/Users/wywy/Desktop/level_out1'
 all_image=[]
 all_image1=[]
 all_label=[]
@@ -34,7 +34,7 @@ choice_dict=dict(zip([0,1,2,3,4],list('ABCDX')))
 
 with tf.Graph().as_default():
     output_graph_def = tf.GraphDef()
-    output_graph_path = "./level_modle11.pb"
+    output_graph_path = "./level_modle13.pb"
 
     with open(output_graph_path, "rb") as f:
         output_graph_def.ParseFromString(f.read())

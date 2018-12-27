@@ -6,6 +6,7 @@ import logging
 import urllib.request
 
 
+
 import imutils
 from imutils.perspective import  four_point_transform
 from skimage import data, exposure, img_as_float
@@ -20,6 +21,11 @@ from skimage import io
 import math
 import numpy.matlib
 import random
+
+
+
+import requests as req
+from io import BytesIO
 
 
 
@@ -604,57 +610,13 @@ def ExamNumberArea(all_set,image):
     num_area = image[y1:y2, x1:x2]
     return num_area
 
-# #
-# ROI_set=(1150,280,1700,850)
-# img_path='/Users/wywy/Desktop/level'
-# save_path='/Users/wywy/Desktop/level_ROI'
-def get_ROIArea(img_path,save_path,ROI_set):
-    for file in os.listdir(img_path):
-        if file !='.DS_Store':
-            img=Image.open(os.path.join(img_path,file))
-            ROI_img=img.crop(ROI_set)
-            ROI_img.save(os.path.join(save_path,file))
-
-# get_ROIArea(img_path,save_path,ROI_set)
-
-
-
-
-
-
-def level_main():
-    cc=0
-    img_path='/Users/wywy/Desktop/level_ROI'
-    save_path='/Users/wywy/Desktop/level_out1'
-    for file in os.listdir(img_path):
-        if file=='.DS_Store':
-            os.remove(os.path.join(img_path,file))
-        else:
-            image=cv2.imread(img_path+'/'+file)
-            # all_set, image=SetPasre(img_path+'/'+file)
-            # warped=CorrectPaper(all_set, image)
-
-            # res=ResizePaper(warped, (1725,2500))
-            all_set, image=AreaPaser(image, 5000)
-            for s in all_set:
-                # cv2.rectangle(image,(s[0],s[1]),(s[2],s[3]),(255,0,0),3)
-                crop=image[s[1]+100:s[3]-10,s[0]+10:s[2]-10]
-
-            # scoring_area1=ScoringArea1(all_set, warped)
-            # answer_area=AnswerArea(all_set, image)
-            # number_area=ExamNumberArea(all_set, image)
-                cv2.imwrite(save_path+'/'+file,crop)
-            # cc+=1
-# level_main()
-
 
 
 #根据数据日期获取图片，获取等级识别数据
-def get_level_data(img_path,label_path,save_path,date_infor):
+def get_level_data(img_path,label_path,date_infor):
     """
     :param img_path: 图片html的txt文件的路径
     :param label_path: 图片label的txt文件的路径
-    :param save_path: 保存图片的路径
     :param date_infor: 图片上传的日期
     :return:
     """
@@ -675,50 +637,68 @@ def get_level_data(img_path,label_path,save_path,date_infor):
             label=label.strip()
             if label in label_infor:
                 all_label.append(label)
-
+    get_img=list()
+    get_label=list()
     for i,infor in enumerate(all_html):
-        urllib.request.urlretrieve(infor,save_path+'/{}_{}.jpg'.format(i,all_label[i]))
 
-#
-# img_path='/Users/wywy/Desktop/img.txt'
-# label_path='/Users/wywy/Desktop/label.txt'
-# save_path='/Users/wywy/Desktop/level'
-# date_infor=20181221
-# get_level_data(img_path,label_path,save_path,date_infor)
+        # image=io.imread(infor)   #通过io读取URL图片（）
+        response = req.get(infor)
+        image = Image.open(BytesIO(response.content))
+        get_img.append(image)
+        get_label.append(all_label[i])
 
-
-
-# img_path='/Users/wywy/Desktop/level_out1'
-# save_path='/Users/wywy/Desktop/level_out'
-# c=181
-# for file in os.listdir(img_path):
-#     if file != '.DS_Store':
-#         img=Image.open(os.path.join(img_path,file))
-#         name=file.split('.')[0].split('_')[-1]
-#         img.save(os.path.join(save_path,'{}_{}.jpg'.format(c,name)))
-#         c+=1
-# print(c)
-#
-# img_path='/Users/wywy/Desktop/train_level'
-# save_path='/Users/wywy/Desktop/b_save'
-#
-# for file in os.listdir(img_path):
-#     if file != '.DS_Store':
-#         name=file.split('.')[0].split('_')[0]
-#         if 'f' in list(name):
-#             print(file)
+    return get_img,get_label
 
 
-img_path='/Users/wywy/Desktop/train_level'
-# save_path='/Users/wywy/Desktop/train_level'
-for file in os.listdir(img_path):
-    if file !='.DS_Store':
-        img=Image.open(os.path.join(img_path,file))
-        w,h=img.size
-        if w>1 and h>1:
-            pass
-        else:
-            print(file)
+
+# #
+# ROI_set=(1150,280,1700,850)
+# img_path='/Users/wywy/Desktop/level'
+# save_path='/Users/wywy/Desktop/level_ROI'
+def get_ROIArea(get_img,ROI_set):
+    roi_img=list()
+    for im in get_img:
+        crop_img=im.crop(ROI_set)
+        roi_img.append(crop_img)
+    return roi_img
+
+
+
+
+def get_levelImg(roi_img):
+    all_crop_img=list()
+    for image in roi_img:
+        all_set, image=AreaPaser(np.array(image), 5000)
+        for s in all_set:
+            # cv2.rectangle(image,(s[0],s[1]),(s[2],s[3]),(255,0,0),3)
+            crop=image[s[1]+100:s[3]-10,s[0]+10:s[2]-10]
+            # cv2.imwrite(os.path.join('/Users/wywy/Desktop/level_out1', '{}_{}.jpg'.format(0, 1)), image)
+            all_crop_img.append(crop)
+
+    return all_crop_img
+
+
+
+def level_main():
+    img_path='/Users/wywy/Desktop/img.txt'
+    label_path='/Users/wywy/Desktop/label.txt'
+    save_path='/Users/wywy/Desktop/level_out1'
+    ROI_set = (1150, 280, 1700, 850)
+    date_infor = 20181225
+
+    paper_img,label = get_level_data(img_path,label_path,date_infor)
+    roi_img = get_ROIArea(paper_img,ROI_set)
+    all_crop_img = get_levelImg(roi_img)
+    for i ,img in enumerate(all_crop_img):
+        cv2.imwrite(os.path.join(save_path,'{}_{}.jpg'.format(i,label[i])),img)
+
+
+
+level_main()
+
+
+
+
 
 
 
