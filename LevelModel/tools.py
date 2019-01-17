@@ -30,6 +30,73 @@ from io import BytesIO
 
 
 #等级打分区域数据收集部分------------------------------
+G=5
+b=25
+beta=46
+alpha=125
+sigma_list=[int(15),int(80),int(250)]
+sigma=1
+def singleScaleRetinex(img,sigma):
+    temp=cv2.GaussianBlur(img,(0,0),sigma)
+    gaussian=np.where(temp ==0, 0.01, temp)
+    tetinex=np.log10(img+0.01) - np.log10(gaussian)
+
+    return tetinex
+
+#多尺度计算
+def multiScaleRetinex(img,sigma_list):
+    retinex=np.zeros_like(img*1.0)
+    for sigma in sigma_list:
+        retinex += singleScaleRetinex(img,sigma)
+    retinex=retinex/len(sigma_list)
+
+    return retinex
+
+
+#颜色恢复
+
+def colorRestoration(img,alpha,beta):
+    img_sum=np.sum(img,axis=2,keepdims=True)
+    color_restoration=beta*(np.log10(alpha*img)-np.log10(img_sum))
+
+    return color_restoration
+
+# MSRCR
+low_clip=0.01
+high_clip=0.99
+
+def simplestColorBalance(img,low_clip,high_clip):
+    total=img.shape[0]*img.shape[1]
+    for i in range(img.shape[2]):
+        unique,counts=np.unique(img[:,:,i],return_counts=True)
+        current=0
+        for u, c in zip(unique,counts):
+            if float(current) /total<low_clip:
+                low_val=u
+            if float(current) /total<high_clip:
+                high_val=u
+            current+=c
+        img[:,:,i]=np.maximum(np.minimum(img[:,:,i],high_val),low_val)
+
+    return img
+
+def MSRCR(img,sigma_list,G,b,alpha,beta,low_clip,high_clip):
+    img=np.float64(img)+1.0
+
+    img_retinex=multiScaleRetinex(img,sigma_list)
+    img_color=colorRestoration(img,alpha,beta)
+    img_msrcr=G*(img_retinex*img_color+b)
+
+    for i in range(img_msrcr.shape[2]):
+        img_msrcr[:,:,i]=(img_msrcr[:,:,i]-np.min(img_msrcr[:,:,i]))/(np.max(img_msrcr[:,:,i]) - np.min(img_msrcr[:,:,i]))*255
+
+    img_msrcr=np.uint8(np.minimum(np.maximum(img_msrcr,0),255))
+    img_msrcr=simplestColorBalance(img_msrcr,low_clip,high_clip)
+
+    return img_msrcr
+
+
+
 
 
 def pasre(img_path,save_path):
@@ -40,13 +107,17 @@ def pasre(img_path,save_path):
     '''
     cc = 0
     image = cv2.imread(img_path)
+    # image = exposure.adjust_gamma(image, 0.5)
     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, image_gray = cv2.threshold(image_gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    image_gray = cv2.morphologyEx(image_gray, cv2.MORPH_OPEN, kernel)
+    # image_gray = cv2.adaptiveThreshold(image_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C,
+    #                             cv2.THRESH_BINARY, 11, 2)
+    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+    # image_gray = cv2.morphologyEx(image_gray, cv2.MORPH_OPEN, kernel)
     _, contours, _ = cv2.findContours(image_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     img_crop=image.copy()
     cv2.drawContours(img_crop, contours, -1, (0, 255, 0), 3)
+    # cv2.imwrite(save_path+'/a.jpg',img_crop)
     squares = []
     epsilon = 0.1
     min_area = 100*310
@@ -77,9 +148,11 @@ def pasre(img_path,save_path):
         x1, y1, x2, y2 = x_set[0], y_set[0], x_set[-1], y_set[-1]
 
         crop_img = image[y1:y2, x1:x2]
-        cv2.imwrite(save_path+'/{}_{}.jpg'.format(img_path.split('/')[-1].split('.')[0],cc), crop_img)
+        cv2.imwrite(save_path+'/{}_{}_{}.jpg'.format(img_path.split('/')[-1].split('.')[0].split('_')[0],
+                    cc,img_path.split('/')[-1].split('.')[0].split('_')[-1]), crop_img)
         cc += 1
     print(len(points))
+
 
 
 def discover(folder_path,save_path):
@@ -92,12 +165,16 @@ def discover(folder_path,save_path):
 
 
 def main():
-    img_path='/Users/wywy/Desktop/cc'
-    save_path='/Users/wywy/Desktop/cc_'
+    img_path='/Users/wywy/Desktop/m_correct/oo'
+    save_path='/Users/wywy/Desktop/m_correct/out'
     discover(img_path,save_path)
 
 
 # main()
+
+
+
+
 
 
 
@@ -321,15 +398,22 @@ def salt(img, n):
     return img
 
 
-# img_path = '/Users/wywy/Desktop/level_aug'
-# save_path='/Users/wywy/Desktop/level_aug2'
+# img_path = '/Users/wywy/Desktop/train_level'
+# save_path='/Users/wywy/Desktop/level_mobile'
+# c=0
 # for file in os.listdir(img_path):
 #     if file=='.DS_Store':
 #         os.remove(img_path+'/'+file)
 #     else:
 #         img=cv2.imread(img_path+'/'+file)
-#         s_img=salt(img,3000)
-#         cv2.imwrite(save_path+'/aug4_'+file,s_img)
+#         s_img=salt(img,10000)
+#         name=file.split('.')[0].split('_')[-1]
+#         f=file.split('.')[0].split('_')[0]
+#         if 'd' not in list(f):
+#             cv2.imwrite(os.path.join(save_path,'m{}_{}.jpg'.format(c,name)),s_img)
+#             c+=1
+# print(c)
+        # cv2.imwrite(save_path+'/m_'+file,s_img)
 # #
 
 
@@ -682,7 +766,7 @@ def get_levelImg(roi_img):
 def level_main():
     img_path='/Users/wywy/Desktop/img.txt'
     label_path='/Users/wywy/Desktop/label.txt'
-    save_path='/Users/wywy/Desktop/level_out1'
+    save_path='/Users/wywy/Desktop/level_out3'
     ROI_set = (1150, 280, 1700, 850)
     date_infor = 20181225
 
@@ -694,7 +778,67 @@ def level_main():
 
 
 
-level_main()
+# level_main()
+#
+
+#生成手机拍照数据
+#更改背景色：
+
+def change_bg(img_path,save_path):
+    color=[0.61,0.71,0.81,0.91,0.84,0.85,0.89,0.74,0.77,0.70,0.94,0.95,0.99,0.58]
+    size=[(3,3),(5,5),(7,7),(9,9)]
+    sigma_size=[1.2,3.4,5,3.2,4.1,3.3,2.2,2.8,6.3]
+    for file in os.listdir(img_path):
+        if file != '.DS_Store':
+            name=file.split('.')[0].split('_')[-1]
+            f=file.split('.')[0].split('_')[0]
+            if 'b' not in list(f):
+                img = cv2.imread(os.path.join(img_path, file))
+                color_threshold=color[np.random.randint(len(color))]
+                k_size=size[np.random.randint(len(size))]
+                sigma=sigma_size[np.random.randint(len(sigma_size))]
+
+                for i in range(img.shape[0]):
+                    for j in range(img.shape[1]):
+                        # if img[i,j][0] > 180:
+
+                        img[i,j]=img[i,j]*color_threshold
+
+                img = cv2.GaussianBlur(img, k_size, sigma)
+                cv2.imwrite(os.path.join(save_path,file),img)
+                print(os.path.join(save_path,file))
+                print('save')
+
+
+# change_bg(img_path,save_path)
+
+from sklearn.datasets.samples_generator import make_blobs
+from sklearn import svm
+
+from sklearn.datasets import fetch_lfw_people
+lfw_people = fetch_lfw_people(min_faces_per_person=70, resize=0.4)
+x = lfw_people.data
+y = lfw_people.target
+
+print(x.shape)
+label=set([i for i in y])
+print(label)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 
 
-trainimg_path="/Users/wywy/Desktop/train_level"
+trainimg_path="/Users/wywy/Desktop/train_img1"
 train_filename = './train.tfrecords'
 
 data_dict=dict(zip(list('ABCDX'),[0,1,2,3,4]))
